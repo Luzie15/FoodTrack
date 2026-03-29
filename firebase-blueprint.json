@@ -1,0 +1,27 @@
+{
+  "entities": {
+    "PantryItem": {
+      "title": "Pantry Item",
+      "description": "A single item in the pantry inventory",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier" },
+        "name": { "type": "string", "description": "Name of the product" },
+        "category": { "type": "string", "description": "Category (Kühlschrank, Speisekammer, Gefrierfach)" },
+        "quantity": { "type": "string", "description": "Quantity with unit (e.g., 500g, 1.2L)" },
+        "expiryDate": { "type": "string", "description": "Expiry date in ISO format" },
+        "status": { "type": "string", "enum": ["fresh", "safe", "warning", "expired"], "description": "Status based on expiry" },
+        "imageUrl": { "type": "string", "description": "URL to product image" },
+        "uid": { "type": "string", "description": "Owner's user ID" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["name", "category", "quantity", "status", "uid"]
+    }
+  },
+  "firestore": {
+    "/items/{itemId}": {
+      "schema": "PantryItem",
+      "description": "Collection of all pantry items"
+    }
+  }
+}

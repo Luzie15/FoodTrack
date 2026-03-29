@@ -1,0 +1,100 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: items
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required, 1-100 chars)
+    //   - category: string (required, enum: Kühlschrank, Speisekammer, Gefrierfach)
+    //   - quantity: string (required, 1-50 chars)
+    //   - expiryDate: string (optional, ISO format)
+    //   - status: string (required, enum: fresh, safe, warning, expired)
+    //   - imageUrl: string (optional, URL format)
+    //   - uid: string (required, matches auth.uid)
+    //   - createdAt: timestamp (optional, server-assigned)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) || request.resource.data.uid == request.auth.uid;
+    }
+
+    function uidNotModified() {
+      return !('uid' in request.resource.data) || request.resource.data.uid == resource.data.uid;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function isValidUrl(url) {
+      return url is string && (url.matches("^https://.*") || url.matches("^http://.*"));
+    }
+
+    function isValidStatus(status) {
+      return status in ['fresh', 'safe', 'warning', 'expired'];
+    }
+
+    function isValidCategory(category) {
+      return category in ['Kühlschrank', 'Speisekammer', 'Gefrierfach', 'Obst & Gemüse'];
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "luziepfeiffer@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    function isValidPantryItem(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.category is string && isValidCategory(data.category) &&
+             data.quantity is string && data.quantity.size() > 0 && data.quantity.size() <= 50 &&
+             (!('expiryDate' in data) || data.expiryDate is string) &&
+             data.status is string && isValidStatus(data.status) &&
+             (!('imageUrl' in data) || isValidUrl(data.imageUrl)) &&
+             data.uid is string && data.uid == request.auth.uid &&
+             (!('tags' in data) || data.tags is list) &&
+             (!('createdAt' in data) || data.createdAt is string) &&
+             (!('serverCreatedAt' in data) || data.serverCreatedAt is timestamp);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /items/{itemId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if isAuthenticated() && isValidPantryItem(request.resource.data) && uidUnchanged();
+      allow update: if isDocOwner() && isValidPantryItem(request.resource.data) && uidNotModified();
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "name": "Vorratskammer",
+  "description": "Eine intelligente App zur Verwaltung deiner Vorräte und zur Rettung von Lebensmitteln mit Rezepten.",
+  "requestFramePermissions": ["camera"]
+}
