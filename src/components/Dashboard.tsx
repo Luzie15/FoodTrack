@@ -1,4 +1,4 @@
-import { AlertTriangle, Clock, ChevronRight, Barcode } from 'lucide-react';
+import { AlertTriangle, Clock, ChevronRight, Plus } from 'lucide-react';
 import { PantryItem } from '../types';
 import { getRemainingDays } from '../lib/utils';
 
@@ -132,7 +132,7 @@ export default function Dashboard({ items, onAddClick }: DashboardProps) {
           onClick={onAddClick}
           className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary-container text-white shadow-xl shadow-green-900/20 flex items-center justify-center active:scale-90 transition-transform duration-200 ring-8 ring-background"
         >
-          <Barcode className="w-8 h-8" />
+          <Plus className="w-8 h-8" />
         </button>
       </div>
     </div>

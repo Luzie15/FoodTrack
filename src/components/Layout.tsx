@@ -19,9 +19,12 @@ export default function Layout({ children, activeScreen, onScreenChange }: Layou
             <button className="p-2 rounded-full hover:bg-surface-container-high transition-colors">
               <Menu className="w-6 h-6 text-primary" />
             </button>
-            <h1 className="font-headline font-extrabold text-xl text-primary tracking-tight">
-              Vorratskammer
-            </h1>
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg shadow-sm" />
+              <h1 className="font-headline font-extrabold text-xl text-primary tracking-tight">
+                FoodTrack
+              </h1>
+            </div>
           </div>
           <button className="p-2 rounded-full hover:bg-surface-container-high transition-colors">
             <Search className="w-6 h-6 text-primary" />
